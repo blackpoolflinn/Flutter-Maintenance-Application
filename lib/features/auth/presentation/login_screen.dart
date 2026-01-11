@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../data/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +12,49 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  void _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final response = await _authService.login(
+        _emailController.text, 
+        _passwordController.text
+      );
+
+      if (response['success'] == true) {
+        // success
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text("Login Successful!")),
+           );
+           
+           // navigate here
+
+        }
+      }
+    } catch (e) {
+      // failed
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +73,17 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min, 
             children: [
+              // error message
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: AppColors.error),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
               // Email
               TextField(
                 controller: _emailController,
@@ -82,14 +137,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {
-                    print("Email: ${_emailController.text}");
-                    print("Password: ${_passwordController.text}");
-                  },
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  // Disable button while loading
+                  onPressed: _isLoading ? null : _handleLogin,
+                  child: _isLoading 
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Login",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                 ),
               ),
             ],

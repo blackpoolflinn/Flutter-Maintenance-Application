@@ -76,3 +76,6 @@ Thumbs.db
 
 # Secrets
 .env
+
+backend/venv
+backend/__pycache__
