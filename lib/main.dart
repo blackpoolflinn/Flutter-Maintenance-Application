@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'features/auth/presentation/login_screen.dart';
+import 'features/auth/presentation/auth_provider.dart'; // Import your new provider
 import 'widgets/main_layout.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuthStatus()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -14,13 +23,22 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Maintenance Application',
       theme: ThemeData(primarySwatch: Colors.blue),
-      
-      // Define the "Big Jumps" here
-      initialRoute: '/login',
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const MainLayout(child: Placeholder()),
-      },
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          // show loading indicator while checking auth status
+          if (auth.isLoading) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+
+          // if authenticated send to home screen
+          if (auth.isAuthenticated) {
+            return const MainLayout(child: Center(child: Text("Welcome Home!")));
+          }
+
+          // else show login screen
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }

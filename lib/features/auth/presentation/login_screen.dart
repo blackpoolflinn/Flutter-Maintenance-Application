@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../data/auth_service.dart';
+import 'auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +14,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  final AuthService _authService = AuthService();
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -24,24 +24,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await _authService.login(
-        _emailController.text, 
-        _passwordController.text
-      );
-
-      if (response['success'] == true) {
-        // success
-        if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text("Login Successful!")),
-           );
-           
-           // navigate here
-
-        }
-      }
+      await Provider.of<AuthProvider>(context, listen: false)
+          .login(_emailController.text, _passwordController.text);
+      
     } catch (e) {
-      // failed
       if (mounted) {
         setState(() {
           _errorMessage = e.toString().replaceAll('Exception: ', '');
@@ -63,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text("Login"),
         centerTitle: true,
-        backgroundColor: AppColors.primaryBlue,
+        backgroundColor: AppColors.darkBlue,
         foregroundColor: AppColors.textWhite,
         elevation: 0,
       ),
@@ -98,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide(color: AppColors.textSecondary),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                    borderSide: BorderSide(color: AppColors.darkBlue, width: 2),
                   ),
                 ),
               ),
@@ -119,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide(color: AppColors.textSecondary),
                   ),
                   focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
+                    borderSide: BorderSide(color: AppColors.darkBlue, width: 2),
                   ),
                 ),
               ),
@@ -131,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
+                    backgroundColor: AppColors.darkBlue,
                     foregroundColor: AppColors.textWhite,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
