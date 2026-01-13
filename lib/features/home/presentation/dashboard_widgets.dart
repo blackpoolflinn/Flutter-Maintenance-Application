@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../auth/presentation/auth_provider.dart';
 
 class HeaderDesktop extends StatelessWidget {
   const HeaderDesktop({super.key});
@@ -21,6 +23,10 @@ class HeaderDesktop extends StatelessWidget {
         Row(
           children: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+            IconButton(onPressed: () {
+              context.read<AuthProvider>().logout();
+              }, 
+              icon: const Icon(Icons.logout))
           ],
         )
       ],
