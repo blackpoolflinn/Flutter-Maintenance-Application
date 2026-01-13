@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../features/auth/presentation/auth_provider.dart';
-import 'sidebar.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;

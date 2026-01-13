@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../widgets/sidebar.dart';
 import 'dashboard_widgets.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../widgets/stats_grid.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -25,7 +26,7 @@ class DashboardScreen extends StatelessWidget {
           // sidebar visible only on desktop
           if (isDesktop) const SizedBox(width: 250, child: Sidebar()),
           
-          // main Content
+          // main content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -36,6 +37,9 @@ class DashboardScreen extends StatelessWidget {
                     const HeaderDesktop(),
                     const SizedBox(height: 24),
                   ],
+
+                  const StatsGrid(),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
