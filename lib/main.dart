@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Import Provider
+import 'package:provider/provider.dart';
 import 'features/auth/presentation/login_screen.dart';
-import 'features/auth/presentation/auth_provider.dart'; // Import your new provider
+import 'features/auth/presentation/auth_provider.dart';
 import 'widgets/main_layout.dart';
+import 'features/home/presentation/dashboard_screen.dart';
 
 void main() {
   runApp(
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
 
           // if authenticated send to home screen
           if (auth.isAuthenticated) {
-            return const MainLayout(child: Center(child: Text("Welcome Home!")));
+            return const MainLayout(child: DashboardScreen());
           }
 
           // else show login screen
