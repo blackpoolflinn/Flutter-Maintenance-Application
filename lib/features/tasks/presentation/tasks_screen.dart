@@ -29,6 +29,32 @@ class _TasksScreenState extends State<TasksScreen> {
     super.dispose();
   }
 
+  String _getStatusLabel(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'inProgress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'pending':
+        return Colors.red;
+      case 'inProgress':
+        return Colors.blue;
+      case 'completed':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
   void _createTask() {
     if (_titleController.text.isNotEmpty) {
       context.read<TasksProvider>().createTask(
@@ -154,14 +180,36 @@ class _TasksScreenState extends State<TasksScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
-                        leading: Checkbox(
-                          value: task.status == 'completed',
-                          onChanged: (value) {
-                            tasksProvider.updateTaskStatus(
-                              task,
-                              value == true ? 'completed' : 'pending',
-                            );
+                        leading: PopupMenuButton<String>(
+                          initialValue: task.status,
+                          onSelected: (String status) {
+                            tasksProvider.updateTaskStatus(task, status);
                           },
+                          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                            const PopupMenuItem<String>(
+                              value: 'pending',
+                              child: Text('Pending'),
+                            ),
+                            const PopupMenuItem<String>(
+                              value: 'inProgress',
+                              child: Text('In Progress'),
+                            ),
+                            const PopupMenuItem<String>(
+                              value: 'completed',
+                              child: Text('Completed'),
+                            ),
+                          ],
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(task.status),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              _getStatusLabel(task.status),
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ),
                         ),
                         title: Text(
                           task.title,

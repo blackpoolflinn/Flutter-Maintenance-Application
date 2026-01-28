@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../core/theme/app_colors.dart';
+import '../core/providers/tasks_provider.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -54,28 +56,37 @@ class StatsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
-    // temporary data for visual designing
-    List<Widget> cards = [
-       const StatCard(title: "Total Tasks", count: "24", color: Color(0xFFEAB308), icon: Icons.handyman),
-       const StatCard(title: "In Progress", count: "8", color: Color(0xFF3B82F6), icon: Icons.loop),
-       const StatCard(title: "Completed", count: "15", color: Color(0xFF22C55E), icon: Icons.check_circle),
-       const StatCard(title: "Pending", count: "6", color: Color(0xFFEF4444), icon: Icons.bolt),
-    ];
+    return Consumer<TasksProvider>(
+      builder: (context, tasksProvider, _) {
+        // Calculate task statistics
+        final total = tasksProvider.tasks.length;
+        final pending = tasksProvider.tasks.where((t) => t.status == 'pending').length;
+        final inProgress = tasksProvider.tasks.where((t) => t.status == 'inProgress').length;
+        final completed = tasksProvider.tasks.where((t) => t.status == 'completed').length;
 
-    if (width > 900) {
-      return Row(
-        children: cards.map((c) => Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6.0), child: c))).toList(),
-      );
-    } else {
-      return GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.8,
-        children: cards,
-      );
-    }
+        List<Widget> cards = [
+          StatCard(title: "Total Tasks", count: total.toString(), color: const Color(0xFFEAB308), icon: Icons.handyman),
+          StatCard(title: "In Progress", count: inProgress.toString(), color: const Color(0xFF3B82F6), icon: Icons.loop),
+          StatCard(title: "Completed", count: completed.toString(), color: const Color(0xFF22C55E), icon: Icons.check_circle),
+          StatCard(title: "Pending", count: pending.toString(), color: const Color(0xFFEF4444), icon: Icons.bolt),
+        ];
+
+        if (width > 900) {
+          return Row(
+            children: cards.map((c) => Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6.0), child: c))).toList(),
+          );
+        } else {
+          return GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.8,
+            children: cards,
+          );
+        }
+      },
+    );
   }
 }

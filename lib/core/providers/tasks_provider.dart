@@ -33,7 +33,9 @@ class TasksProvider extends ChangeNotifier {
       await _db.insertTask(task);
       await loadTasks();
     } catch (e) {
-      throw Exception('Failed to create task: $e');
+      print('Error creating task: $e');
+      // Fail silently and refresh
+      await loadTasks();
     }
   }
 
@@ -43,7 +45,8 @@ class TasksProvider extends ChangeNotifier {
       await _db.deleteTask(id);
       await loadTasks();
     } catch (e) {
-      throw Exception('Failed to delete task: $e');
+      print('Error deleting task: $e');
+      await loadTasks();
     }
   }
 
@@ -60,7 +63,8 @@ class TasksProvider extends ChangeNotifier {
       await _db.updateTask(updatedTask);
       await loadTasks();
     } catch (e) {
-      throw Exception('Failed to update task: $e');
+      print('Error updating task: $e');
+      await loadTasks();
     }
   }
 }

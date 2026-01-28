@@ -15,7 +15,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuthStatus()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        ChangeNotifierProvider(create: (_) => TasksProvider()),
+        ChangeNotifierProvider(create: (_) => TasksProvider()..loadTasks()),
       ],
       child: const MyApp(),
     ),

@@ -58,7 +58,7 @@ class DatabaseHelper {
     final path = join(dbPath, 'maintenance_app.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
     );
   }
