@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/auth_provider.dart';
+import 'core/providers/navigation_provider.dart';
 import 'widgets/main_layout.dart';
-import 'features/home/presentation/dashboard_screen.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuthStatus()),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ],
       child: const MyApp(),
     ),
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
 
           // if authenticated send to home screen
           if (auth.isAuthenticated) {
-            return const MainLayout(child: DashboardScreen());
+            return const MainLayout();
           }
 
           // else show login screen

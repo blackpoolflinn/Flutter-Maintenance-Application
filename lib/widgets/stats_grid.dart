@@ -11,6 +11,13 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    
+    // Responsive sizing
+    final titleFontSize = width < 600 ? 11.0 : 13.0;
+    final countFontSize = width < 600 ? 20.0 : 28.0;
+    final iconSize = width < 600 ? 24.0 : 32.0;
+    
     return Container(
       decoration: BoxDecoration(
         color: color,
@@ -24,12 +31,14 @@ class StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(color: AppColors.textWhite, fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(title, style: TextStyle(color: AppColors.textWhite, fontSize: titleFontSize, fontWeight: FontWeight.w500)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(count, style: const TextStyle(color: AppColors.textWhite, fontSize: 28, fontWeight: FontWeight.bold)),
-              Icon(icon, color: AppColors.textWhite.withValues(alpha: 0.5), size: 32),
+              Flexible(
+                child: Text(count, style: TextStyle(color: AppColors.textWhite, fontSize: countFontSize, fontWeight: FontWeight.bold)),
+              ),
+              Icon(icon, color: AppColors.textWhite.withValues(alpha: 0.5), size: iconSize),
             ],
           )
         ],

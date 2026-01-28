@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/sidebar.dart';
 import 'dashboard_widgets.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../widgets/stats_grid.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -13,38 +11,21 @@ class DashboardScreen extends StatelessWidget {
     final isDesktop = width > 900;
 
     return Scaffold(
-      appBar: isDesktop
-          ? null
-          : AppBar(
-              backgroundColor: AppColors.darkBlue,
-              title: const Text("Maintenance Application", style: TextStyle(color: AppColors.textWhite)),
-              iconTheme: const IconThemeData(color: AppColors.textWhite),
-            ),
-      drawer: !isDesktop ? const Sidebar() : null,
-      body: Row(
-        children: [
-          // sidebar visible only on desktop
-          if (isDesktop) const SizedBox(width: 250, child: Sidebar()),
-          
-          // main content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (isDesktop) ...[
-                    const HeaderDesktop(),
-                    const SizedBox(height: 24),
-                  ],
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isDesktop) ...[
+              const HeaderDesktop(),
+              const SizedBox(height: 24),
+            ],
 
-                  const StatsGrid(),
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
-        ],
+            const StatsGrid(),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

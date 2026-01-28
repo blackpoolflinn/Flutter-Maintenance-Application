@@ -7,6 +7,8 @@ class AppColors {
   static const Color darkBlue = Color(0xFF1E293B); 
   static const Color primaryBlue = Color(0xFF1E40AF);
   static const Color amberAccent = Color(0xFFEAB308); 
+  static const Color selectedBlue = Color(0xFF2B3A55);
+  static const Color darkerBlue = Color(0xFF0F172A);
 
   static const Color scaffoldBackground = Color(0xFFF3F4F6);
   static const Color cardBackground = Color(0xFFFFFFFF);
