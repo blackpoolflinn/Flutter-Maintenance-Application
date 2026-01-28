@@ -1,14 +1,14 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class Job {
+class Task {
   final int? id;
   final String title;
   final String description;
   final String status;
   final DateTime createdAt;
 
-  Job({
+  Task({
     this.id,
     required this.title,
     required this.description,
@@ -26,8 +26,8 @@ class Job {
     };
   }
 
-  factory Job.fromMap(Map<String, dynamic> map) {
-    return Job(
+  factory Task.fromMap(Map<String, dynamic> map) {
+    return Task(
       id: map['id'],
       title: map['title'],
       description: map['description'],
@@ -65,7 +65,7 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE jobs (
+      CREATE TABLE tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         description TEXT NOT NULL,
@@ -75,24 +75,24 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<int> insertJob(Job job) async {
+  Future<int> insertTask(Task task) async {
     final db = await database;
-    return db.insert('jobs', job.toMap());
+    return db.insert('tasks', task.toMap());
   }
 
-  Future<List<Job>> getJobs() async {
+  Future<List<Task>> getTasks() async {
     final db = await database;
-    final result = await db.query('jobs', orderBy: 'id DESC');
-    return result.map((map) => Job.fromMap(map)).toList();
+    final result = await db.query('tasks', orderBy: 'id DESC');
+    return result.map((map) => Task.fromMap(map)).toList();
   }
 
-  Future<int> updateJob(Job job) async {
+  Future<int> updateTask(Task task) async {
     final db = await database;
-    return db.update('jobs', job.toMap(), where: 'id = ?', whereArgs: [job.id]);
+    return db.update('tasks', task.toMap(), where: 'id = ?', whereArgs: [task.id]);
   }
 
-  Future<int> deleteJob(int id) async {
+  Future<int> deleteTask(int id) async {
     final db = await database;
-    return db.delete('jobs', where: 'id = ?', whereArgs: [id]);
+    return db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 }
