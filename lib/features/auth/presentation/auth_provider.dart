@@ -17,9 +17,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    await _authService.login(email, password);
-    _isAuthenticated = true;
-    notifyListeners();
+    final success = await _authService.login(email, password);
+    if (success) {
+      _isAuthenticated = true;
+      notifyListeners();
+    }
   }
 
   Future<void> logout() async {
