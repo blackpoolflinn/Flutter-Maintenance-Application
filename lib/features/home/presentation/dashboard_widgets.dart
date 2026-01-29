@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../auth/presentation/auth_provider.dart';
 import '../../../core/providers/tasks_provider.dart';
 import '../../../core/providers/aircraft_provider.dart';
 import '../../../core/providers/sync_provider.dart';
