@@ -21,6 +21,10 @@ class DashboardScreen extends StatelessWidget {
               const HeaderDesktop(),
               const SizedBox(height: 24),
             ],
+            if (!isDesktop) ...[
+              const SyncStatusHeader(),
+              const SizedBox(height: 24),
+            ],
 
             const StatsGrid(),
             const SizedBox(height: 24),

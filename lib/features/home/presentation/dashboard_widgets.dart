@@ -23,47 +23,82 @@ class HeaderDesktop extends StatelessWidget {
             ),
           ],
         ),
-        Consumer3<TasksProvider, AircraftProvider, SyncProvider>(
-          builder: (context, tasksProvider, aircraftProvider, syncProvider, _) {
-            final unsyncedTasks = tasksProvider.tasks.where((t) => t.syncedAt == null).length;
-            final unsyncedAircraft = aircraftProvider.aircraft.where((a) => a.syncedAt == null).length;
-            final unsyncedTotal = unsyncedTasks + unsyncedAircraft;
+        const SyncStatusAndButton(),
+      ],
+    );
+  }
+}
 
-            Color statusColor;
-            String statusText;
+class SyncStatusHeader extends StatelessWidget {
+  const SyncStatusHeader({super.key});
 
-            if (syncProvider.lastError != null) {
-              statusColor = Colors.red;
-              statusText = 'Sync failed';
-            } else if (unsyncedTotal > 0) {
-              statusColor = Colors.orange;
-              statusText = 'Unsynced: $unsyncedTotal';
-            } else {
-              statusColor = Colors.green;
-              statusText = 'All synced';
-            }
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.dashboard_customize, color: Colors.grey[800]),
+            const SizedBox(width: 10),
+            Text(
+              "Dashboard",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            ),
+          ],
+        ),
+        const SyncStatusAndButton(),
+      ],
+    );
+  }
+}
 
-            return Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.sync, color: statusColor, size: 16),
-                        const SizedBox(width: 6),
-                        Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                    if (syncProvider.lastSyncAt != null)
-                      Text(
-                        'Last sync: ${syncProvider.lastSyncAt!.toLocal().toString().split('.').first}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
+class SyncStatusAndButton extends StatelessWidget {
+  const SyncStatusAndButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 900;
+    final isSmall = width < 500;
+
+    return Consumer3<TasksProvider, AircraftProvider, SyncProvider>(
+      builder: (context, tasksProvider, aircraftProvider, syncProvider, _) {
+        final unsyncedTasks = tasksProvider.tasks.where((t) => t.syncedAt == null).length;
+        final unsyncedAircraft = aircraftProvider.aircraft.where((a) => a.syncedAt == null).length;
+        final unsyncedTotal = unsyncedTasks + unsyncedAircraft;
+
+        Color statusColor;
+        String statusText;
+
+        if (syncProvider.lastError != null) {
+          statusColor = Colors.red;
+          statusText = 'Sync failed';
+        } else if (unsyncedTotal > 0) {
+          statusColor = Colors.orange;
+          statusText = 'Unsynced: $unsyncedTotal';
+        } else {
+          statusColor = Colors.green;
+          statusText = 'All synced';
+        }
+
+        if (isSmall) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sync, color: statusColor, size: 12),
+                  const SizedBox(width: 4),
+                  Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 10)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 32,
+                child: ElevatedButton.icon(
                   onPressed: syncProvider.isSyncing
                       ? null
                       : () async {
@@ -75,26 +110,108 @@ class HeaderDesktop extends StatelessWidget {
                         },
                   icon: syncProvider.isSyncing
                       ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 1.5),
                         )
-                      : const Icon(Icons.cloud_sync),
-                  label: const Text('Sync'),
+                      : const Icon(Icons.cloud_sync, size: 16),
+                  label: const Text('Sync', style: TextStyle(fontSize: 11)),
                 ),
-                const SizedBox(width: 8),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-                IconButton(
-                  onPressed: () {
-                    context.read<AuthProvider>().logout();
-                  },
-                  icon: const Icon(Icons.logout),
-                )
+              ),
+            ],
+          );
+        }
+
+        if (isMobile) {
+          return Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.sync, color: statusColor, size: 14),
+                      const SizedBox(width: 4),
+                      Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 12)),
+                    ],
+                  ),
+                  if (syncProvider.lastSyncAt != null)
+                    Text(
+                      'Last sync: ${syncProvider.lastSyncAt!.toLocal().toString().split('.').first}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                    ),
+                ],
+              ),
+              ElevatedButton.icon(
+                onPressed: syncProvider.isSyncing
+                    ? null
+                    : () async {
+                        await syncProvider.syncNow();
+                        if (context.mounted) {
+                          await context.read<TasksProvider>().loadTasks();
+                          await context.read<AircraftProvider>().loadAircraft();
+                        }
+                      },
+                icon: syncProvider.isSyncing
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_sync, size: 18),
+                label: const Text('Sync', style: TextStyle(fontSize: 12)),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.sync, color: statusColor, size: 16),
+                    const SizedBox(width: 6),
+                    Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                if (syncProvider.lastSyncAt != null)
+                  Text(
+                    'Last sync: ${syncProvider.lastSyncAt!.toLocal().toString().split('.').first}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                  ),
               ],
-            );
-          },
-        )
-      ],
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton.icon(
+              onPressed: syncProvider.isSyncing
+                  ? null
+                  : () async {
+                      await syncProvider.syncNow();
+                      if (context.mounted) {
+                        await context.read<TasksProvider>().loadTasks();
+                        await context.read<AircraftProvider>().loadAircraft();
+                      }
+                    },
+              icon: syncProvider.isSyncing
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_sync),
+              label: const Text('Sync'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
