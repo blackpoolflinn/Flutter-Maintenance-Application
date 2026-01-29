@@ -37,6 +37,50 @@ class Task {
   }
 }
 
+class Aircraft {
+  final int? id;
+  final String registrationNumber;
+  final String model;
+  final String manufacturer;
+  final int yearOfManufacture;
+  final String status;
+  final DateTime createdAt;
+
+  Aircraft({
+    this.id,
+    required this.registrationNumber,
+    required this.model,
+    required this.manufacturer,
+    required this.yearOfManufacture,
+    this.status = 'active',
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'registrationNumber': registrationNumber,
+      'model': model,
+      'manufacturer': manufacturer,
+      'yearOfManufacture': yearOfManufacture,
+      'status': status,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory Aircraft.fromMap(Map<String, dynamic> map) {
+    return Aircraft(
+      id: map['id'],
+      registrationNumber: map['registrationNumber'],
+      model: map['model'],
+      manufacturer: map['manufacturer'],
+      yearOfManufacture: map['yearOfManufacture'],
+      status: map['status'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+}
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
@@ -58,8 +102,9 @@ class DatabaseHelper {
     final path = join(dbPath, 'maintenance_app.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -73,6 +118,34 @@ class DatabaseHelper {
         createdAt TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE aircraft (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        registrationNumber TEXT NOT NULL,
+        model TEXT NOT NULL,
+        manufacturer TEXT NOT NULL,
+        yearOfManufacture INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        createdAt TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS aircraft (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          registrationNumber TEXT NOT NULL,
+          model TEXT NOT NULL,
+          manufacturer TEXT NOT NULL,
+          yearOfManufacture INTEGER NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          createdAt TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<int> insertTask(Task task) async {
@@ -94,5 +167,27 @@ class DatabaseHelper {
   Future<int> deleteTask(int id) async {
     final db = await database;
     return db.delete('tasks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Aircraft methods
+  Future<int> insertAircraft(Aircraft aircraft) async {
+    final db = await database;
+    return db.insert('aircraft', aircraft.toMap());
+  }
+
+  Future<List<Aircraft>> getAircraft() async {
+    final db = await database;
+    final result = await db.query('aircraft', orderBy: 'id DESC');
+    return result.map((map) => Aircraft.fromMap(map)).toList();
+  }
+
+  Future<int> updateAircraft(Aircraft aircraft) async {
+    final db = await database;
+    return db.update('aircraft', aircraft.toMap(), where: 'id = ?', whereArgs: [aircraft.id]);
+  }
+
+  Future<int> deleteAircraft(int id) async {
+    final db = await database;
+    return db.delete('aircraft', where: 'id = ?', whereArgs: [id]);
   }
 }
