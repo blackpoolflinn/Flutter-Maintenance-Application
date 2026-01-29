@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/auth_provider.dart';
@@ -8,8 +9,11 @@ import 'core/providers/tasks_provider.dart';
 import 'widgets/main_layout.dart';
 
 void main() async {
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  // Only use FFI on desktop platforms (Windows)
+  if (!Platform.isAndroid && !Platform.isIOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(
     MultiProvider(
       providers: [
