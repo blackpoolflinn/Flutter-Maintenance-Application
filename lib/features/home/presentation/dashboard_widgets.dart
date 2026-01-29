@@ -269,8 +269,15 @@ class _MyTasksCardState extends State<MyTasksCard> {
   }
 }
 
-class AircraftOverviewCard extends StatelessWidget {
+class AircraftOverviewCard extends StatefulWidget {
   const AircraftOverviewCard({super.key});
+
+  @override
+  State<AircraftOverviewCard> createState() => _AircraftOverviewCardState();
+}
+
+class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
+  int _page = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -283,24 +290,62 @@ class AircraftOverviewCard extends StatelessWidget {
       ),
       child: Consumer2<TasksProvider, AircraftProvider>(
         builder: (context, tasksProvider, aircraftProvider, _) {
+          const pageSize = 5;
           final aircraftList = aircraftProvider.aircraft;
+          final totalAircraft = aircraftList.length;
+          final totalPages = totalAircraft == 0 ? 1 : ((totalAircraft - 1) ~/ pageSize) + 1;
+          final currentPage = _page.clamp(0, totalPages - 1);
+          final start = currentPage * pageSize;
+          final end = (start + pageSize) > totalAircraft ? totalAircraft : (start + pageSize);
+          final displayAircraft = totalAircraft == 0 ? <dynamic>[] : aircraftList.sublist(start, end);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Aircraft Overview',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Aircraft Overview',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        tooltip: 'Previous',
+                        onPressed: totalAircraft > pageSize && currentPage > 0
+                            ? () {
+                                setState(() {
+                                  _page = currentPage - 1;
+                                });
+                              }
+                            : null,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        tooltip: 'Next',
+                        onPressed: totalAircraft > pageSize && currentPage < totalPages - 1
+                            ? () {
+                                setState(() {
+                                  _page = currentPage + 1;
+                                });
+                              }
+                            : null,
+                      ),
+                    ],
+                  )
+                ],
               ),
               const SizedBox(height: 12),
-              if (aircraftList.isEmpty)
+              if (displayAircraft.isEmpty)
                 Text(
                   'No aircraft available',
                   style: TextStyle(color: Colors.grey[600]),
                 )
               else
                 Column(
-                  children: aircraftList.map((aircraft) {
+                  children: displayAircraft.map((aircraft) {
                     final tasksForAircraft = tasksProvider.tasks
                         .where((task) => task.aircraftId == aircraft.id)
                         .toList();
