@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
+import '../../../core/providers/tasks_provider.dart';
+import '../../../core/providers/aircraft_provider.dart';
 
 class HeaderDesktop extends StatelessWidget {
   const HeaderDesktop({super.key});
@@ -30,6 +32,271 @@ class HeaderDesktop extends StatelessWidget {
           ],
         )
       ],
+    );
+  }
+}
+
+class MyTasksCard extends StatefulWidget {
+  const MyTasksCard({super.key});
+
+  @override
+  State<MyTasksCard> createState() => _MyTasksCardState();
+}
+
+class _MyTasksCardState extends State<MyTasksCard> {
+  int _page = 0;
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'pending':
+        return Colors.red;
+      case 'inProgress':
+        return Colors.blue;
+      case 'completed':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Pending';
+      case 'inProgress':
+        return 'In Progress';
+      case 'completed':
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+      ),
+      child: Consumer<TasksProvider>(
+        builder: (context, tasksProvider, _) {
+          const pageSize = 5;
+          final statusPriority = {
+            'inProgress': 0,
+            'pending': 1,
+            'completed': 2,
+          };
+
+          final sortedTasks = [...tasksProvider.tasks]
+            ..sort((a, b) {
+              final aPriority = statusPriority[a.status] ?? 3;
+              final bPriority = statusPriority[b.status] ?? 3;
+              final byStatus = aPriority.compareTo(bPriority);
+              if (byStatus != 0) return byStatus;
+              return b.createdAt.compareTo(a.createdAt);
+            });
+
+          final totalTasks = sortedTasks.length;
+          final totalPages = totalTasks == 0 ? 1 : ((totalTasks - 1) ~/ pageSize) + 1;
+          final currentPage = _page.clamp(0, totalPages - 1);
+          final start = currentPage * pageSize;
+          final end = (start + pageSize) > totalTasks ? totalTasks : (start + pageSize);
+          final tasks = totalTasks == 0 ? <dynamic>[] : sortedTasks.sublist(start, end);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'My Tasks',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        tooltip: 'Previous',
+                        onPressed: totalTasks > pageSize && currentPage > 0
+                            ? () {
+                                setState(() {
+                                  _page = currentPage - 1;
+                                });
+                              }
+                            : null,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        tooltip: 'Next',
+                        onPressed: totalTasks > pageSize && currentPage < totalPages - 1
+                            ? () {
+                                setState(() {
+                                  _page = currentPage + 1;
+                                });
+                              }
+                            : null,
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (tasks.isEmpty)
+                Text(
+                  'No tasks available',
+                  style: TextStyle(color: Colors.grey[600]),
+                )
+              else
+                Column(
+                  children: tasks.map((task) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _statusColor(task.status),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              _statusLabel(task.status),
+                              style: const TextStyle(color: Colors.white, fontSize: 10),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              task.title,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class AircraftOverviewCard extends StatelessWidget {
+  const AircraftOverviewCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+      ),
+      child: Consumer2<TasksProvider, AircraftProvider>(
+        builder: (context, tasksProvider, aircraftProvider, _) {
+          final aircraftList = aircraftProvider.aircraft;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Aircraft Overview',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              if (aircraftList.isEmpty)
+                Text(
+                  'No aircraft available',
+                  style: TextStyle(color: Colors.grey[600]),
+                )
+              else
+                Column(
+                  children: aircraftList.map((aircraft) {
+                    final tasksForAircraft = tasksProvider.tasks
+                        .where((task) => task.aircraftId == aircraft.id)
+                        .toList();
+                    final total = tasksForAircraft.length;
+                    final completed = tasksForAircraft.where((t) => t.status == 'completed').length;
+                    final progress = total == 0 ? 1.0 : completed / total;
+                    final openCount = total - completed;
+                    final progressLabel = '${(progress * 100).round()}%';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Icon(Icons.flight, color: Colors.grey),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      aircraft.registrationNumber,
+                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      aircraft.model,
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                progressLabel,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 8,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              progress >= 0.7 ? Colors.green : Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            total == 0
+                                ? 'No tasks assigned'
+                                : 'Open: $openCount / Total: $total',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

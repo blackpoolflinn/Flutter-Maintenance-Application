@@ -24,6 +24,23 @@ class DashboardScreen extends StatelessWidget {
 
             const StatsGrid(),
             const SizedBox(height: 24),
+            if (isDesktop)
+              const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: MyTasksCard()),
+                  SizedBox(width: 24),
+                  Expanded(child: AircraftOverviewCard()),
+                ],
+              )
+            else
+              const Column(
+                children: [
+                  MyTasksCard(),
+                  SizedBox(height: 24),
+                  AircraftOverviewCard(),
+                ],
+              ),
           ],
         ),
       ),
