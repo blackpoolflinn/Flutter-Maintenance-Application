@@ -23,12 +23,17 @@ class TasksProvider extends ChangeNotifier {
   }
 
   /// Create a new task
-  Future<void> createTask(String title, String description) async {
+  Future<void> createTask({
+    required String title,
+    required String description,
+    required int aircraftId,
+  }) async {
     try {
       final task = Task(
         title: title,
         description: description,
         status: 'pending',
+        aircraftId: aircraftId,
       );
       await _db.insertTask(task);
       await loadTasks();
@@ -58,12 +63,32 @@ class TasksProvider extends ChangeNotifier {
         title: task.title,
         description: task.description,
         status: newStatus,
+        aircraftId: task.aircraftId,
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);
       await loadTasks();
     } catch (e) {
       print('Error updating task: $e');
+      await loadTasks();
+    }
+  }
+
+  /// Update task aircraft link
+  Future<void> updateTaskAircraft(Task task, int aircraftId) async {
+    try {
+      final updatedTask = Task(
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        aircraftId: aircraftId,
+        createdAt: task.createdAt,
+      );
+      await _db.updateTask(updatedTask);
+      await loadTasks();
+    } catch (e) {
+      print('Error updating task aircraft: $e');
       await loadTasks();
     }
   }

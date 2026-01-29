@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/tasks_provider.dart';
+import '../../../core/providers/aircraft_provider.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -13,12 +14,14 @@ class TasksScreen extends StatefulWidget {
 class _TasksScreenState extends State<TasksScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  int? _selectedAircraftId;
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       context.read<TasksProvider>().loadTasks();
+      context.read<AircraftProvider>().loadAircraft();
     });
   }
 
@@ -56,20 +59,55 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   void _createTask() {
+    final aircraftProvider = context.read<AircraftProvider>();
+
+    if (aircraftProvider.aircraft.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Create an aircraft before adding a task.')),
+      );
+      return;
+    }
+
+    if (_selectedAircraftId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an aircraft for this task.')),
+      );
+      return;
+    }
+
     if (_titleController.text.isNotEmpty) {
       context.read<TasksProvider>().createTask(
-            _titleController.text,
-            _descriptionController.text,
+            title: _titleController.text,
+            description: _descriptionController.text,
+            aircraftId: _selectedAircraftId!,
           );
       _titleController.clear();
       _descriptionController.clear();
+      setState(() {
+        _selectedAircraftId = null;
+      });
     }
+  }
+
+  String _getAircraftLabel(int? aircraftId, List aircraftList) {
+    if (aircraftId == null) {
+      return 'Unassigned';
+    }
+    for (final aircraft in aircraftList) {
+      if (aircraft.id == aircraftId) {
+        return '${aircraft.registrationNumber} - ${aircraft.model}';
+      }
+    }
+    return 'Unknown';
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isDesktop = width > 900;
+
+    final aircraftProvider = context.watch<AircraftProvider>();
+    final hasAircraft = aircraftProvider.aircraft.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -135,8 +173,43 @@ class _TasksScreenState extends State<TasksScreen> {
                     maxLines: 3,
                   ),
                   const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    value: _selectedAircraftId,
+                    items: aircraftProvider.aircraft
+                        .where((aircraft) => aircraft.id != null)
+                        .map(
+                          (aircraft) => DropdownMenuItem<int>(
+                            value: aircraft.id,
+                            child: Text('${aircraft.registrationNumber} - ${aircraft.model}'),
+                          ),
+                        )
+                        .toList(),
+                    decoration: InputDecoration(
+                      hintText: 'Select aircraft',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    disabledHint: const Text('No aircraft available'),
+                    onSaved: (_) {},
+                    onChanged: hasAircraft
+                        ? (value) {
+                            setState(() {
+                              _selectedAircraftId = value;
+                            });
+                          }
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  if (!hasAircraft)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Create an aircraft first to add tasks.',
+                        style: TextStyle(color: Colors.orange[700]),
+                      ),
+                    ),
                   ElevatedButton(
-                    onPressed: _createTask,
+                    onPressed: hasAircraft ? _createTask : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.amberAccent,
                       foregroundColor: Colors.black,
@@ -219,9 +292,35 @@ class _TasksScreenState extends State<TasksScreen> {
                                 : TextDecoration.none,
                           ),
                         ),
-                        subtitle: task.description.isNotEmpty
-                            ? Text(task.description)
-                            : null,
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Aircraft: ${_getAircraftLabel(task.aircraftId, aircraftProvider.aircraft)}'),
+                            if (task.description.isNotEmpty) Text(task.description),
+                            if (task.aircraftId == null && aircraftProvider.aircraft.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: DropdownButton<int>(
+                                  value: null,
+                                  hint: const Text('Assign aircraft'),
+                                  items: aircraftProvider.aircraft
+                                      .where((aircraft) => aircraft.id != null)
+                                      .map(
+                                        (aircraft) => DropdownMenuItem<int>(
+                                          value: aircraft.id,
+                                          child: Text('${aircraft.registrationNumber} - ${aircraft.model}'),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      tasksProvider.updateTaskAircraft(task, value);
+                                    }
+                                  },
+                                ),
+                              ),
+                          ],
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {

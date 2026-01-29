@@ -6,6 +6,7 @@ class Task {
   final String title;
   final String description;
   final String status;
+  final int? aircraftId;
   final DateTime createdAt;
 
   Task({
@@ -13,6 +14,7 @@ class Task {
     required this.title,
     required this.description,
     this.status = 'pending',
+    this.aircraftId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -22,6 +24,7 @@ class Task {
       'title': title,
       'description': description,
       'status': status,
+      'aircraftId': aircraftId,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -32,6 +35,7 @@ class Task {
       title: map['title'],
       description: map['description'],
       status: map['status'],
+      aircraftId: map['aircraftId'],
       createdAt: DateTime.parse(map['createdAt']),
     );
   }
@@ -102,7 +106,7 @@ class DatabaseHelper {
     final path = join(dbPath, 'maintenance_app.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -115,6 +119,7 @@ class DatabaseHelper {
         title TEXT NOT NULL,
         description TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
+        aircraftId INTEGER,
         createdAt TEXT NOT NULL
       )
     ''');
@@ -145,6 +150,10 @@ class DatabaseHelper {
           createdAt TEXT NOT NULL
         )
       ''');
+    }
+
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE tasks ADD COLUMN aircraftId INTEGER');
     }
   }
 
