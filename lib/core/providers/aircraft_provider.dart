@@ -36,6 +36,7 @@ class AircraftProvider extends ChangeNotifier {
         manufacturer: manufacturer,
         yearOfManufacture: yearOfManufacture,
         status: 'active',
+        syncedAt: null,
       );
       await _db.insertAircraft(aircraft);
       await loadAircraft();
@@ -66,6 +67,7 @@ class AircraftProvider extends ChangeNotifier {
         manufacturer: aircraft.manufacturer,
         yearOfManufacture: aircraft.yearOfManufacture,
         status: newStatus,
+        syncedAt: null,
         createdAt: aircraft.createdAt,
       );
       await _db.updateAircraft(updatedAircraft);

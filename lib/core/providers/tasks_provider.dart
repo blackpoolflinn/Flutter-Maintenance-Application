@@ -34,6 +34,7 @@ class TasksProvider extends ChangeNotifier {
         description: description,
         status: 'pending',
         aircraftId: aircraftId,
+        syncedAt: null,
       );
       await _db.insertTask(task);
       await loadTasks();
@@ -64,6 +65,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: newStatus,
         aircraftId: task.aircraftId,
+        syncedAt: null,
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);
@@ -83,6 +85,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: task.status,
         aircraftId: aircraftId,
+        syncedAt: null,
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);

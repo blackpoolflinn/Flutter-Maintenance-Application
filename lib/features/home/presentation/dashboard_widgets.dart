@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../auth/presentation/auth_provider.dart';
 import '../../../core/providers/tasks_provider.dart';
 import '../../../core/providers/aircraft_provider.dart';
+import '../../../core/providers/sync_provider.dart';
 
 class HeaderDesktop extends StatelessWidget {
   const HeaderDesktop({super.key});
@@ -22,14 +23,76 @@ class HeaderDesktop extends StatelessWidget {
             ),
           ],
         ),
-        Row(
-          children: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-            IconButton(onPressed: () {
-              context.read<AuthProvider>().logout();
-              }, 
-              icon: const Icon(Icons.logout))
-          ],
+        Consumer3<TasksProvider, AircraftProvider, SyncProvider>(
+          builder: (context, tasksProvider, aircraftProvider, syncProvider, _) {
+            final unsyncedTasks = tasksProvider.tasks.where((t) => t.syncedAt == null).length;
+            final unsyncedAircraft = aircraftProvider.aircraft.where((a) => a.syncedAt == null).length;
+            final unsyncedTotal = unsyncedTasks + unsyncedAircraft;
+
+            Color statusColor;
+            String statusText;
+
+            if (syncProvider.lastError != null) {
+              statusColor = Colors.red;
+              statusText = 'Sync failed';
+            } else if (unsyncedTotal > 0) {
+              statusColor = Colors.orange;
+              statusText = 'Unsynced: $unsyncedTotal';
+            } else {
+              statusColor = Colors.green;
+              statusText = 'All synced';
+            }
+
+            return Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.sync, color: statusColor, size: 16),
+                        const SizedBox(width: 6),
+                        Text(statusText, style: TextStyle(color: statusColor, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    if (syncProvider.lastSyncAt != null)
+                      Text(
+                        'Last sync: ${syncProvider.lastSyncAt!.toLocal().toString().split('.').first}',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: syncProvider.isSyncing
+                      ? null
+                      : () async {
+                          await syncProvider.syncNow();
+                          if (context.mounted) {
+                            await context.read<TasksProvider>().loadTasks();
+                            await context.read<AircraftProvider>().loadAircraft();
+                          }
+                        },
+                  icon: syncProvider.isSyncing
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_sync),
+                  label: const Text('Sync'),
+                ),
+                const SizedBox(width: 8),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+                IconButton(
+                  onPressed: () {
+                    context.read<AuthProvider>().logout();
+                  },
+                  icon: const Icon(Icons.logout),
+                )
+              ],
+            );
+          },
         )
       ],
     );
@@ -153,6 +216,7 @@ class _MyTasksCardState extends State<MyTasksCard> {
               else
                 Column(
                   children: tasks.map((task) {
+                    final isSynced = task.syncedAt != null;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Row(
@@ -174,6 +238,22 @@ class _MyTasksCardState extends State<MyTasksCard> {
                               task.title,
                               style: const TextStyle(fontWeight: FontWeight.w600),
                               overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isSynced ? Colors.green[100] : Colors.orange[100],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              isSynced ? 'Synced' : 'Not synced',
+                              style: TextStyle(
+                                color: isSynced ? Colors.green[800] : Colors.orange[800],
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -229,6 +309,7 @@ class AircraftOverviewCard extends StatelessWidget {
                     final progress = total == 0 ? 1.0 : completed / total;
                     final openCount = total - completed;
                     final progressLabel = '${(progress * 100).round()}%';
+                    final isSynced = aircraft.syncedAt != null;
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -266,9 +347,23 @@ class AircraftOverviewCard extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                progressLabel,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    progressLabel,
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    isSynced ? 'Synced' : 'Not synced',
+                                    style: TextStyle(
+                                      color: isSynced ? Colors.green[700] : Colors.orange[700],
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

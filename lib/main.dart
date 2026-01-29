@@ -7,6 +7,7 @@ import 'features/auth/presentation/auth_provider.dart';
 import 'core/providers/navigation_provider.dart';
 import 'core/providers/tasks_provider.dart';
 import 'core/providers/aircraft_provider.dart';
+import 'core/providers/sync_provider.dart';
 import 'widgets/main_layout.dart';
 
 void main() async {
@@ -22,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => TasksProvider()..loadTasks()),
         ChangeNotifierProvider(create: (_) => AircraftProvider()..loadAircraft()),
+        ChangeNotifierProvider(create: (_) => SyncProvider()),
       ],
       child: const MyApp(),
     ),
