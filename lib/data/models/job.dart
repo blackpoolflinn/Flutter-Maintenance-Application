@@ -164,12 +164,27 @@ class DatabaseHelper {
     }
 
     if (oldVersion < 4) {
-      await db.execute('ALTER TABLE tasks ADD COLUMN aircraftId INTEGER');
+      // Check if aircraftId column exists before adding
+      final tasksColumns = await db.rawQuery('PRAGMA table_info(tasks)');
+      final hasAircraftId = tasksColumns.any((col) => col['name'] == 'aircraftId');
+      if (!hasAircraftId) {
+        await db.execute('ALTER TABLE tasks ADD COLUMN aircraftId INTEGER');
+      }
     }
 
     if (oldVersion < 5) {
-      await db.execute('ALTER TABLE tasks ADD COLUMN syncedAt TEXT');
-      await db.execute('ALTER TABLE aircraft ADD COLUMN syncedAt TEXT');
+      // Check if syncedAt columns exist before adding
+      final tasksColumns = await db.rawQuery('PRAGMA table_info(tasks)');
+      final hasSyncedAtTasks = tasksColumns.any((col) => col['name'] == 'syncedAt');
+      if (!hasSyncedAtTasks) {
+        await db.execute('ALTER TABLE tasks ADD COLUMN syncedAt TEXT');
+      }
+
+      final aircraftColumns = await db.rawQuery('PRAGMA table_info(aircraft)');
+      final hasSyncedAtAircraft = aircraftColumns.any((col) => col['name'] == 'syncedAt');
+      if (!hasSyncedAtAircraft) {
+        await db.execute('ALTER TABLE aircraft ADD COLUMN syncedAt TEXT');
+      }
     }
   }
 

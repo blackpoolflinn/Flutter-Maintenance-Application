@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../data/models/job.dart';
@@ -18,7 +19,15 @@ class SyncProvider extends ChangeNotifier {
   int get lastTasksSynced => _lastTasksSynced;
   int get lastAircraftSynced => _lastAircraftSynced;
 
-  Future<void> syncNow({String baseUrl = 'http://127.0.0.1:8000'}) async {
+  String _getBaseUrl() {
+    // Android emulator needs 10.0.2.2 to reach host machine's localhost
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:8000';
+    }
+    return 'http://127.0.0.1:8000';
+  }
+
+  Future<void> syncNow({String? baseUrl}) async {
     if (_isSyncing) return;
 
     _isSyncing = true;
@@ -26,6 +35,7 @@ class SyncProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final url = baseUrl ?? _getBaseUrl();
       final unsyncedTasks = await _db.getUnsyncedTasks();
       final unsyncedAircraft = await _db.getUnsyncedAircraft();
 
@@ -58,7 +68,7 @@ class SyncProvider extends ChangeNotifier {
       };
 
       final response = await http.post(
-        Uri.parse('$baseUrl/sync'),
+        Uri.parse('$url/sync'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
       );

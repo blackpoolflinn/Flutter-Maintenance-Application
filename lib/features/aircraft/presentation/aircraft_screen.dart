@@ -59,23 +59,53 @@ class _AircraftScreenState extends State<AircraftScreen> {
     }
   }
 
-  void _createAircraft() {
-    if (_registrationController.text.isNotEmpty &&
-        _modelController.text.isNotEmpty &&
-        _manufacturerController.text.isNotEmpty &&
-        _yearController.text.isNotEmpty) {
-      final year = int.tryParse(_yearController.text);
-      if (year != null) {
-        context.read<AircraftProvider>().createAircraft(
-              registrationNumber: _registrationController.text,
-              model: _modelController.text,
-              manufacturer: _manufacturerController.text,
-              yearOfManufacture: year,
-            );
-        _registrationController.clear();
-        _modelController.clear();
-        _manufacturerController.clear();
-        _yearController.clear();
+  void _createAircraft() async {
+    if (_registrationController.text.isEmpty ||
+        _modelController.text.isEmpty ||
+        _manufacturerController.text.isEmpty ||
+        _yearController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    final year = int.tryParse(_yearController.text);
+    if (year == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Year must be a valid number')),
+      );
+      return;
+    }
+
+    try {
+      final aircraftProvider = context.read<AircraftProvider>();
+      await aircraftProvider.createAircraft(
+        registrationNumber: _registrationController.text,
+        model: _modelController.text,
+        manufacturer: _manufacturerController.text,
+        yearOfManufacture: year,
+      );
+      
+      // Explicitly reload to ensure UI updates
+      await aircraftProvider.loadAircraft();
+      
+      _registrationController.clear();
+      _modelController.clear();
+      _manufacturerController.clear();
+      _yearController.clear();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aircraft created successfully')),
+        );
+      }
+    } catch (e) {
+      print('Create aircraft error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating aircraft: $e')),
+        );
       }
     }
   }
