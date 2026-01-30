@@ -407,7 +407,23 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
       child: Consumer2<TasksProvider, AircraftProvider>(
         builder: (context, tasksProvider, aircraftProvider, _) {
           const pageSize = 5;
-          final aircraftList = aircraftProvider.aircraft;
+          
+          // Sort aircraft by maintenance status first, then by creation date
+          final statusPriority = {
+            'maintenance': 0,
+            'active': 1,
+            'retired': 2,
+          };
+          
+          final aircraftList = [...aircraftProvider.aircraft]
+            ..sort((a, b) {
+              final aPriority = statusPriority[a.status] ?? 3;
+              final bPriority = statusPriority[b.status] ?? 3;
+              final byStatus = aPriority.compareTo(bPriority);
+              if (byStatus != 0) return byStatus;
+              return b.createdAt.compareTo(a.createdAt);
+            });
+          
           final totalAircraft = aircraftList.length;
           final totalPages = totalAircraft == 0 ? 1 : ((totalAircraft - 1) ~/ pageSize) + 1;
           final currentPage = _page.clamp(0, totalPages - 1);

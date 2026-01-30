@@ -190,7 +190,7 @@ class _AircraftScreenState extends State<AircraftScreen> {
                   TextField(
                     controller: _yearController,
                     decoration: InputDecoration(
-                      hintText: 'Year of Manufacture',
+                      hintText: 'Year',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     ),
