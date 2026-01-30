@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/app_colors.dart';
 import '../core/providers/navigation_provider.dart';
+import '../features/auth/presentation/auth_provider.dart';
 
 class Sidebar extends StatelessWidget {
   final VoidCallback? onNavigate;
@@ -54,6 +55,18 @@ class Sidebar extends StatelessWidget {
                 );
               },
             ),
+          ),
+          const Divider(color: AppColors.textSecondary, height: 1),
+          ListTile(
+            leading: const Icon(Icons.logout, color: AppColors.textWhite, size: 20),
+            title: const Text(
+              'Logout',
+              style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.w600),
+            ),
+            onTap: () async {
+              await context.read<AuthProvider>().logout();
+              onNavigate?.call();
+            },
           ),
         ],
       ),
