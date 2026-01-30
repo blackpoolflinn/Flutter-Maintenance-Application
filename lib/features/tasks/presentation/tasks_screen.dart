@@ -118,23 +118,13 @@ class _TasksScreenState extends State<TasksScreen> {
           children: [
             if (isDesktop) ...[
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.assignment, color: Colors.grey[800], size: 28),
-                      const SizedBox(width: 10),
-                      Text(
-                        "Tasks",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
-                      ),
-                    ],
+                  Icon(Icons.assignment, color: Colors.grey[800], size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Tasks",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
                   ),
-                  Row(
-                    children: [
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-                    ],
-                  )
                 ],
               ),
               const SizedBox(height: 24),

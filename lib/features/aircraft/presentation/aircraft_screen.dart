@@ -124,23 +124,13 @@ class _AircraftScreenState extends State<AircraftScreen> {
           children: [
             if (isDesktop) ...[
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.airplanemode_active, color: Colors.grey[800], size: 28),
-                      const SizedBox(width: 10),
-                      Text(
-                        "Aircraft",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
-                      ),
-                    ],
+                  Icon(Icons.airplanemode_active, color: Colors.grey[800], size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Aircraft",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
                   ),
-                  Row(
-                    children: [
-                      IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
-                    ],
-                  )
                 ],
               ),
               const SizedBox(height: 24),

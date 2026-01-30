@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dashboard_widgets.dart';
-import '../../../widgets/stats_grid.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -26,8 +25,6 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 24),
             ],
 
-            const StatsGrid(),
-            const SizedBox(height: 24),
             if (isDesktop)
               const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
