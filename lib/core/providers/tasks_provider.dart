@@ -65,7 +65,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: newStatus,
         aircraftId: task.aircraftId,
-        syncedAt: null,
+        syncedAt: null,  // Reset to trigger sync on next sync operation
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);
@@ -85,7 +85,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: task.status,
         aircraftId: aircraftId,
-        syncedAt: null,
+        syncedAt: null,  // Reset to trigger sync on next sync operation
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);

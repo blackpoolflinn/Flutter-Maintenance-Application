@@ -11,7 +11,8 @@ import 'core/providers/sync_provider.dart';
 import 'widgets/main_layout.dart';
 
 void main() async {
-  // Only use FFI on desktop platforms (Windows)
+  // SQLite on desktop (Windows/Linux/Mac) requires FFI (Foreign Function Interface)
+  // Android and iOS use native SQLite implementation
   if (!Platform.isAndroid && !Platform.isIOS) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;

@@ -263,10 +263,11 @@ class _MyTasksCardState extends State<MyTasksCard> {
       child: Consumer<TasksProvider>(
         builder: (context, tasksProvider, _) {
           const pageSize = 5;
+          // Sort tasks by status priority, then by creation date (newest first)
           final statusPriority = {
-            'inProgress': 0,
-            'pending': 1,
-            'completed': 2,
+            'inProgress': 0,  // Show in-progress tasks first
+            'pending': 1,     // Then pending tasks
+            'completed': 2,   // Completed tasks last
           };
 
           final sortedTasks = [...tasksProvider.tasks]

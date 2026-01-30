@@ -7,7 +7,7 @@ class AuthService {
     try {
       // Simple local auth - no backend call needed
       if (email == 'rampcheck' && password == 'password123') {
-        await _storage.write(key: 'auth_token', value: 'demo_token_123');
+        await _storage.write(key: 'auth_token', value: 'local_auth_token');
         return true;
       }
       return false;

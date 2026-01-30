@@ -28,7 +28,7 @@ class SyncProvider extends ChangeNotifier {
   }
 
   Future<void> syncNow({String? baseUrl}) async {
-    if (_isSyncing) return;
+    if (_isSyncing) return; // Prevent concurrent sync operations
 
     _isSyncing = true;
     _lastError = null;
@@ -36,6 +36,7 @@ class SyncProvider extends ChangeNotifier {
 
     try {
       final url = baseUrl ?? _getBaseUrl();
+      // Get all local data that hasn't been synced to backend yet
       final unsyncedTasks = await _db.getUnsyncedTasks();
       final unsyncedAircraft = await _db.getUnsyncedAircraft();
 
@@ -81,6 +82,7 @@ class SyncProvider extends ChangeNotifier {
       final taskIds = (decoded['taskIds'] as List<dynamic>).cast<int>();
       final aircraftIds = (decoded['aircraftIds'] as List<dynamic>).cast<int>();
 
+      // Mark local records as synced so they won't be sent again
       final syncedAt = DateTime.now();
       await _db.markTasksSynced(taskIds, syncedAt);
       await _db.markAircraftSynced(aircraftIds, syncedAt);

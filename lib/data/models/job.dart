@@ -18,7 +18,7 @@ class Task {
     this.aircraftId,
     this.syncedAt,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(); // Use provided date or default to now
 
   Map<String, dynamic> toMap() {
     return {
@@ -64,7 +64,7 @@ class Aircraft {
     this.status = 'active',
     this.syncedAt,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(); // Use provided date or default to now
 
   Map<String, dynamic> toMap() {
     return {
@@ -94,6 +94,7 @@ class Aircraft {
 }
 
 class DatabaseHelper {
+  // Singleton pattern ensures only one database instance across the app
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -114,9 +115,8 @@ class DatabaseHelper {
     final path = join(dbPath, 'maintenance_app.db');
     return openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
     );
   }
 
@@ -145,47 +145,6 @@ class DatabaseHelper {
         createdAt TEXT NOT NULL
       )
     ''');
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS aircraft (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          registrationNumber TEXT NOT NULL,
-          model TEXT NOT NULL,
-          manufacturer TEXT NOT NULL,
-          yearOfManufacture INTEGER NOT NULL,
-          status TEXT NOT NULL DEFAULT 'active',
-          syncedAt TEXT,
-          createdAt TEXT NOT NULL
-        )
-      ''');
-    }
-
-    if (oldVersion < 4) {
-      // Check if aircraftId column exists before adding
-      final tasksColumns = await db.rawQuery('PRAGMA table_info(tasks)');
-      final hasAircraftId = tasksColumns.any((col) => col['name'] == 'aircraftId');
-      if (!hasAircraftId) {
-        await db.execute('ALTER TABLE tasks ADD COLUMN aircraftId INTEGER');
-      }
-    }
-
-    if (oldVersion < 5) {
-      // Check if syncedAt columns exist before adding
-      final tasksColumns = await db.rawQuery('PRAGMA table_info(tasks)');
-      final hasSyncedAtTasks = tasksColumns.any((col) => col['name'] == 'syncedAt');
-      if (!hasSyncedAtTasks) {
-        await db.execute('ALTER TABLE tasks ADD COLUMN syncedAt TEXT');
-      }
-
-      final aircraftColumns = await db.rawQuery('PRAGMA table_info(aircraft)');
-      final hasSyncedAtAircraft = aircraftColumns.any((col) => col['name'] == 'syncedAt');
-      if (!hasSyncedAtAircraft) {
-        await db.execute('ALTER TABLE aircraft ADD COLUMN syncedAt TEXT');
-      }
-    }
   }
 
   Future<int> insertTask(Task task) async {
@@ -219,6 +178,7 @@ class DatabaseHelper {
     if (ids.isEmpty) return;
     final db = await database;
     final syncedAtValue = syncedAt.toIso8601String();
+    // Create SQL placeholders (?, ?, ?) for safe parameterized query
     final placeholders = List.filled(ids.length, '?').join(',');
     await db.rawUpdate(
       'UPDATE tasks SET syncedAt = ? WHERE id IN ($placeholders)',
@@ -258,6 +218,7 @@ class DatabaseHelper {
     if (ids.isEmpty) return;
     final db = await database;
     final syncedAtValue = syncedAt.toIso8601String();
+    // Create SQL placeholders (?, ?, ?) for safe parameterized query
     final placeholders = List.filled(ids.length, '?').join(',');
     await db.rawUpdate(
       'UPDATE aircraft SET syncedAt = ? WHERE id IN ($placeholders)',
