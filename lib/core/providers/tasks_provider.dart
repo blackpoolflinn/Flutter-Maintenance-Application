@@ -34,6 +34,7 @@ class TasksProvider extends ChangeNotifier {
         description: description,
         status: 'pending',
         aircraftId: aircraftId,
+        attachments: const [],
         syncedAt: null,
       );
       await _db.insertTask(task);
@@ -65,6 +66,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: newStatus,
         aircraftId: task.aircraftId,
+        attachments: task.attachments,
         syncedAt: null,  // Reset to trigger sync on next sync operation
         createdAt: task.createdAt,
       );
@@ -85,6 +87,7 @@ class TasksProvider extends ChangeNotifier {
         description: task.description,
         status: task.status,
         aircraftId: aircraftId,
+        attachments: task.attachments,
         syncedAt: null,  // Reset to trigger sync on next sync operation
         createdAt: task.createdAt,
       );
@@ -92,6 +95,27 @@ class TasksProvider extends ChangeNotifier {
       await loadTasks();
     } catch (e) {
       print('Error updating task aircraft: $e');
+      await loadTasks();
+    }
+  }
+
+  /// Update task attachments
+  Future<void> updateTaskAttachments(Task task, List<String> attachments) async {
+    try {
+      final updatedTask = Task(
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        aircraftId: task.aircraftId,
+        attachments: attachments,
+        syncedAt: null, // Reset to trigger sync on next sync operation
+        createdAt: task.createdAt,
+      );
+      await _db.updateTask(updatedTask);
+      await loadTasks();
+    } catch (e) {
+      print('Error updating task attachments: $e');
       await loadTasks();
     }
   }

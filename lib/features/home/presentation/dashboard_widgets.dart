@@ -15,11 +15,11 @@ class HeaderDesktop extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.dashboard_customize, color: Colors.grey[800]),
+            Icon(Icons.dashboard_customize, color: AppColors.textPrimary),
             const SizedBox(width: 10),
             Text(
               "Dashboard",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
           ],
         ),
@@ -39,11 +39,11 @@ class SyncStatusHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.dashboard_customize, color: Colors.grey[800]),
+            Icon(Icons.dashboard_customize, color: AppColors.textPrimary),
             const SizedBox(width: 10),
             Text(
               "Dashboard",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
           ],
         ),

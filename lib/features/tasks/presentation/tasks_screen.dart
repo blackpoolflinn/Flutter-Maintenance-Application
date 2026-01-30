@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/tasks_provider.dart';
 import '../../../core/providers/aircraft_provider.dart';
+import '../../../data/models/job.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -30,6 +35,42 @@ class _TasksScreenState extends State<TasksScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addAttachments(Task task) async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null) return;
+
+    final pickedPaths = result.paths.whereType<String>().toList();
+    if (pickedPaths.isEmpty) return;
+
+    final updated = List<String>.from(task.attachments);
+    for (final filePath in pickedPaths) {
+      if (!updated.contains(filePath)) {
+        updated.add(filePath);
+      }
+    }
+
+    if (mounted) {
+      await context.read<TasksProvider>().updateTaskAttachments(task, updated);
+    }
+  }
+
+  Future<void> _removeAttachment(Task task, String attachmentPath) async {
+    final updated = task.attachments.where((path) => path != attachmentPath).toList();
+    if (mounted) {
+      await context.read<TasksProvider>().updateTaskAttachments(task, updated);
+    }
+  }
+
+  bool _isImageFile(String filePath) {
+    final extension = path.extension(filePath).toLowerCase();
+    return extension == '.png' ||
+        extension == '.jpg' ||
+        extension == '.jpeg' ||
+        extension == '.gif' ||
+        extension == '.bmp' ||
+        extension == '.webp';
   }
 
   String _getStatusLabel(String status) {
@@ -119,11 +160,11 @@ class _TasksScreenState extends State<TasksScreen> {
             if (isDesktop) ...[
               Row(
                 children: [
-                  Icon(Icons.assignment, color: AppColors.textTertiary, size: 28),
+                  Icon(Icons.assignment, color: AppColors.textPrimary, size: 28),
                   const SizedBox(width: 10),
                   Text(
                     "Tasks",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textTertiary),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -242,7 +283,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     final task = tasksProvider.tasks[index];
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
+                      child: ExpansionTile(
                         leading: PopupMenuButton<String>(
                           initialValue: task.status,
                           onSelected: (String status) {
@@ -282,41 +323,104 @@ class _TasksScreenState extends State<TasksScreen> {
                                 : TextDecoration.none,
                           ),
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Aircraft: ${_getAircraftLabel(task.aircraftId, aircraftProvider.aircraft)}'),
-                            if (task.description.isNotEmpty) Text(task.description),
-                            if (task.aircraftId == null && aircraftProvider.aircraft.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: DropdownButton<int>(
-                                  value: null,
-                                  hint: const Text('Assign aircraft'),
-                                  items: aircraftProvider.aircraft
-                                      .where((aircraft) => aircraft.id != null)
-                                      .map(
-                                        (aircraft) => DropdownMenuItem<int>(
-                                          value: aircraft.id,
-                                          child: Text('${aircraft.registrationNumber} - ${aircraft.model}'),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      tasksProvider.updateTaskAircraft(task, value);
-                                    }
-                                  },
+                        subtitle: Text(
+                          'Aircraft: ${_getAircraftLabel(task.aircraftId, aircraftProvider.aircraft)}',
+                        ),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (task.description.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text('Description: ${task.description}'),
+                                  ),
+                                if (task.aircraftId == null && aircraftProvider.aircraft.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: DropdownButton<int>(
+                                      value: null,
+                                      hint: const Text('Assign aircraft'),
+                                      items: aircraftProvider.aircraft
+                                          .where((aircraft) => aircraft.id != null)
+                                          .map(
+                                            (aircraft) => DropdownMenuItem<int>(
+                                              value: aircraft.id,
+                                              child: Text('${aircraft.registrationNumber} - ${aircraft.model}'),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          tasksProvider.updateTaskAircraft(task, value);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Attachments',
+                                      style: TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () => _addAttachments(task),
+                                      icon: const Icon(Icons.attach_file, size: 16),
+                                      label: const Text('Add'),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: AppColors.error),
-                          onPressed: () {
-                            tasksProvider.deleteTask(task.id!);
-                          },
-                        ),
+                                if (task.attachments.isEmpty)
+                                  Text(
+                                    'No attachments',
+                                    style: TextStyle(color: AppColors.textTertiary),
+                                  )
+                                else
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: task.attachments.map((attachmentPath) {
+                                      final fileName = path.basename(attachmentPath);
+                                      final isImage = _isImageFile(attachmentPath);
+                                      return Chip(
+                                        avatar: isImage
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(4),
+                                                child: Image.file(
+                                                  File(attachmentPath),
+                                                  width: 24,
+                                                  height: 24,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return const Icon(Icons.image, size: 18);
+                                                  },
+                                                ),
+                                              )
+                                            : const Icon(Icons.attach_file, size: 18),
+                                        label: Text(fileName),
+                                        deleteIcon: const Icon(Icons.close, size: 16),
+                                        onDeleted: () => _removeAttachment(task, attachmentPath),
+                                      );
+                                    }).toList(),
+                                  ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton.icon(
+                                      onPressed: () => tasksProvider.deleteTask(task.id!),
+                                      icon: const Icon(Icons.delete, color: AppColors.error),
+                                      label: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },

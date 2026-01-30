@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -7,6 +8,7 @@ class Task {
   final String description;
   final String status;
   final int? aircraftId;
+  final List<String> attachments;
   final DateTime? syncedAt;
   final DateTime createdAt;
 
@@ -16,6 +18,7 @@ class Task {
     required this.description,
     this.status = 'pending',
     this.aircraftId,
+    this.attachments = const [],
     this.syncedAt,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now(); // Use provided date or default to now
@@ -27,6 +30,7 @@ class Task {
       'description': description,
       'status': status,
       'aircraftId': aircraftId,
+      'attachments': jsonEncode(attachments),
       'syncedAt': syncedAt?.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
     };
@@ -39,6 +43,9 @@ class Task {
       description: map['description'],
       status: map['status'],
       aircraftId: map['aircraftId'],
+      attachments: map['attachments'] != null
+          ? List<String>.from(jsonDecode(map['attachments']))
+          : const [],
       syncedAt: map['syncedAt'] != null ? DateTime.parse(map['syncedAt']) : null,
       createdAt: DateTime.parse(map['createdAt']),
     );
@@ -115,7 +122,7 @@ class DatabaseHelper {
     final path = join(dbPath, 'maintenance_app.db');
     return openDatabase(
       path,
-      version: 6,
+      version: 1,
       onCreate: _onCreate,
     );
   }
@@ -128,6 +135,7 @@ class DatabaseHelper {
         description TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
         aircraftId INTEGER,
+        attachments TEXT NOT NULL DEFAULT '[]',
         syncedAt TEXT,
         createdAt TEXT NOT NULL
       )
@@ -146,6 +154,7 @@ class DatabaseHelper {
       )
     ''');
   }
+
 
   Future<int> insertTask(Task task) async {
     final db = await database;

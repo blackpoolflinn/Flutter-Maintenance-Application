@@ -49,6 +49,7 @@ class SyncProvider extends ChangeNotifier {
                 'description': t.description,
                 'status': t.status,
                 'aircraftId': t.aircraftId,
+                'attachments': t.attachments,
                 'createdAt': t.createdAt.toIso8601String(),
               },
             )

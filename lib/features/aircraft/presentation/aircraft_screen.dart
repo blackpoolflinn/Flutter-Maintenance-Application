@@ -125,11 +125,11 @@ class _AircraftScreenState extends State<AircraftScreen> {
             if (isDesktop) ...[
               Row(
                 children: [
-                  Icon(Icons.airplanemode_active, color: AppColors.textTertiary, size: 28),
+                  Icon(Icons.airplanemode_active, color: AppColors.textPrimary, size: 28),
                   const SizedBox(width: 10),
                   Text(
                     "Aircraft",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textTertiary),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                 ],
               ),
