@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/tasks_provider.dart';
 import '../../../core/providers/aircraft_provider.dart';
 import '../../../core/providers/sync_provider.dart';
+import '../../../core/theme/app_colors.dart';
 
 class HeaderDesktop extends StatelessWidget {
   const HeaderDesktop({super.key});
@@ -71,13 +72,13 @@ class SyncStatusAndButton extends StatelessWidget {
         String statusText;
 
         if (syncProvider.lastError != null) {
-          statusColor = Colors.red;
+          statusColor = AppColors.error;
           statusText = 'Sync failed';
         } else if (unsyncedTotal > 0) {
-          statusColor = Colors.orange;
+          statusColor = AppColors.warning;
           statusText = 'Unsynced: $unsyncedTotal';
         } else {
-          statusColor = Colors.green;
+          statusColor = AppColors.success;
           statusText = 'All synced';
         }
 
@@ -228,13 +229,13 @@ class _MyTasksCardState extends State<MyTasksCard> {
   Color _statusColor(String status) {
     switch (status) {
       case 'pending':
-        return Colors.red;
+        return AppColors.statusPending;
       case 'inProgress':
-        return Colors.blue;
+        return AppColors.statusInProgress;
       case 'completed':
-        return Colors.green;
+        return AppColors.statusCompleted;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -256,9 +257,9 @@ class _MyTasksCardState extends State<MyTasksCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.borderLight),
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: AppColors.cardBackground,
       ),
       child: Consumer<TasksProvider>(
         builder: (context, tasksProvider, _) {
@@ -328,7 +329,7 @@ class _MyTasksCardState extends State<MyTasksCard> {
               if (tasks.isEmpty)
                 Text(
                   'No tasks available',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppColors.textTertiary),
                 )
               else
                 Column(
@@ -361,13 +362,13 @@ class _MyTasksCardState extends State<MyTasksCard> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isSynced ? Colors.green[100] : Colors.orange[100],
+                              color: isSynced ? AppColors.successLight : AppColors.warningLight,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               isSynced ? 'Synced' : 'Not synced',
                               style: TextStyle(
-                                color: isSynced ? Colors.green[800] : Colors.orange[800],
+                                color: isSynced ? AppColors.successDark : AppColors.warningDark,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -401,9 +402,9 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.borderLight),
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: AppColors.cardBackground,
       ),
       child: Consumer2<TasksProvider, AircraftProvider>(
         builder: (context, tasksProvider, aircraftProvider, _) {
@@ -474,7 +475,7 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
               if (displayAircraft.isEmpty)
                 Text(
                   'No aircraft available',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppColors.textTertiary),
                 )
               else
                 Column(
@@ -500,10 +501,10 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[200],
+                                  color: AppColors.borderLighter,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
-                                child: const Icon(Icons.flight, color: Colors.grey),
+                                child: const Icon(Icons.flight, color: AppColors.textSecondary),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -518,7 +519,7 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
                                     const SizedBox(height: 2),
                                     Text(
                                       aircraft.model,
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
@@ -536,7 +537,7 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
                                   Text(
                                     isSynced ? 'Synced' : 'Not synced',
                                     style: TextStyle(
-                                      color: isSynced ? Colors.green[700] : Colors.orange[700],
+                                        color: isSynced ? AppColors.successDark : AppColors.warningDark,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -549,9 +550,9 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
                           LinearProgressIndicator(
                             value: progress,
                             minHeight: 8,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: AppColors.borderLighter,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              progress >= 0.7 ? Colors.green : Colors.orange,
+                              progress >= 0.7 ? AppColors.success : AppColors.warning,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -559,7 +560,7 @@ class _AircraftOverviewCardState extends State<AircraftOverviewCard> {
                             total == 0
                                 ? 'No tasks assigned'
                                 : 'Open: $openCount / Total: $total',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                            style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
                           ),
                         ],
                       ),

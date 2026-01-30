@@ -48,13 +48,13 @@ class _TasksScreenState extends State<TasksScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
-        return Colors.red;
+        return AppColors.statusPending;
       case 'inProgress':
-        return Colors.blue;
+        return AppColors.statusInProgress;
       case 'completed':
-        return Colors.green;
+        return AppColors.statusCompleted;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -110,7 +110,7 @@ class _TasksScreenState extends State<TasksScreen> {
     final hasAircraft = aircraftProvider.aircraft.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -119,11 +119,11 @@ class _TasksScreenState extends State<TasksScreen> {
             if (isDesktop) ...[
               Row(
                 children: [
-                  Icon(Icons.assignment, color: Colors.grey[800], size: 28),
+                  Icon(Icons.assignment, color: AppColors.textTertiary, size: 28),
                   const SizedBox(width: 10),
                   Text(
                     "Tasks",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textTertiary),
                   ),
                 ],
               ),
@@ -132,7 +132,7 @@ class _TasksScreenState extends State<TasksScreen> {
             // Create Task Form
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.borderLight),
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(16),
@@ -195,7 +195,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
                         'Create an aircraft first to add tasks.',
-                        style: TextStyle(color: Colors.orange[700]),
+                        style: TextStyle(color: AppColors.warningDark),
                       ),
                     ),
                   ElevatedButton(
@@ -312,7 +312,7 @@ class _TasksScreenState extends State<TasksScreen> {
                           ],
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(Icons.delete, color: AppColors.error),
                           onPressed: () {
                             tasksProvider.deleteTask(task.id!);
                           },

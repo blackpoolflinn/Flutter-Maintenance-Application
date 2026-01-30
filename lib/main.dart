@@ -8,6 +8,7 @@ import 'core/providers/navigation_provider.dart';
 import 'core/providers/tasks_provider.dart';
 import 'core/providers/aircraft_provider.dart';
 import 'core/providers/sync_provider.dart';
+import 'package:maintenance_application/core/theme/app_colors.dart';
 import 'widgets/main_layout.dart';
 
 void main() async {
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Maintenance Application',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.blue, scaffoldBackgroundColor: AppColors.scaffoldBackground),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           // show loading indicator while checking auth status

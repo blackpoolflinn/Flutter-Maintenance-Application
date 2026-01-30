@@ -50,7 +50,7 @@ class _MainLayoutState extends State<MainLayout> {
               elevation: 1,
               leading: !_sidebarOpen
                   ? IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white),
+                      icon: const Icon(Icons.menu, color: AppColors.textWhite),
                       onPressed: () {
                         setState(() {
                           _sidebarOpen = !_sidebarOpen;
@@ -65,13 +65,13 @@ class _MainLayoutState extends State<MainLayout> {
                         SizedBox(width: 10),
                         Text(
                           'RampCheck',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
                         ),
                       ],
                     )
                   : const Text(
                       'RampCheck',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
                     ),
             ),
             body: _sidebarOpen

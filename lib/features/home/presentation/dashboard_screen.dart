@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dashboard_widgets.dart';
+import '../../../core/theme/app_colors.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -10,7 +11,7 @@ class DashboardScreen extends StatelessWidget {
     final isDesktop = width > 900;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(

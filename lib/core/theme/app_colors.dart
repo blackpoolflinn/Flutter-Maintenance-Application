@@ -22,4 +22,20 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
   static const Color warning = Color(0xFFEAB308);
   static const Color error = Color(0xFFEF4444);
+  
+  // Status colors
+  static const Color statusSuccess = Color(0xFF22C55E);
+  static const Color statusPending = Color(0xFFEF4444);
+  static const Color statusInProgress = Color(0xFF3B82F6);
+  static const Color statusCompleted = Color(0xFF22C55E);
+  
+  // UI border and background colors
+  static const Color borderLight = Color(0xFFE5E7EB);  // Colors.grey[300]
+  static const Color borderLighter = Color(0xFFF3F4F6);  // Colors.grey[100]
+  static const Color textTertiary = Color(0xFF9CA3AF);  // Colors.grey[600]
+  static const Color textQuaternary = Color(0xFFD1D5DB);  // Colors.grey[200]
+  static const Color successLight = Color(0xFFDCFCE7);  // Colors.green[100]
+  static const Color warningLight = Color(0xFFFEF3C7);  // Colors.orange[100]
+  static const Color successDark = Color(0xFF15803D);  // Colors.green[700]
+  static const Color warningDark = Color(0xFFB45309);  // Colors.orange[700]
 }

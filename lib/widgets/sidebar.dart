@@ -86,7 +86,7 @@ class SidebarItem extends StatelessWidget {
         title: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white70,
+            color: isSelected ? AppColors.textWhite : const Color(0xFFB0B0B0),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

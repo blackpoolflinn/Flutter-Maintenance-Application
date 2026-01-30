@@ -49,13 +49,13 @@ class _AircraftScreenState extends State<AircraftScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'active':
-        return Colors.green;
+        return AppColors.success;
       case 'maintenance':
-        return Colors.orange;
+        return AppColors.warning;
       case 'retired':
-        return Colors.red;
+        return AppColors.error;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -116,7 +116,7 @@ class _AircraftScreenState extends State<AircraftScreen> {
     final isDesktop = width > 900;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -125,11 +125,11 @@ class _AircraftScreenState extends State<AircraftScreen> {
             if (isDesktop) ...[
               Row(
                 children: [
-                  Icon(Icons.airplanemode_active, color: Colors.grey[800], size: 28),
+                  Icon(Icons.airplanemode_active, color: AppColors.textTertiary, size: 28),
                   const SizedBox(width: 10),
                   Text(
                     "Aircraft",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textTertiary),
                   ),
                 ],
               ),
@@ -138,7 +138,7 @@ class _AircraftScreenState extends State<AircraftScreen> {
             // Create Aircraft Form
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.borderLight),
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.all(16),
@@ -216,7 +216,7 @@ class _AircraftScreenState extends State<AircraftScreen> {
                       padding: const EdgeInsets.all(24.0),
                       child: Text(
                         'No aircraft registered yet',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: AppColors.textTertiary),
                       ),
                     ),
                   );
@@ -274,7 +274,7 @@ class _AircraftScreenState extends State<AircraftScreen> {
                           ],
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: const Icon(Icons.delete, color: AppColors.error),
                           onPressed: () {
                             aircraftProvider.deleteAircraft(aircraft.id!);
                           },
