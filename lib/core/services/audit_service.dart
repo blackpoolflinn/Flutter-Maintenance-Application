@@ -1,4 +1,5 @@
-import '../../data/models/job.dart';
+import '../../data/database_helper.dart';
+import '../../data/models/audit_log.dart';
 
 class AuditService {
   static final AuditService _instance = AuditService._internal();

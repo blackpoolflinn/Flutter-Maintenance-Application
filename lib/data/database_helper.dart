@@ -1,148 +1,8 @@
-import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
-class Task {
-  final int? id;
-  final String title;
-  final String description;
-  final String status;
-  final int? aircraftId;
-  final List<String> attachments;
-  final DateTime? syncedAt;
-  final DateTime createdAt;
-
-  Task({
-    this.id,
-    required this.title,
-    required this.description,
-    this.status = 'pending',
-    this.aircraftId,
-    this.attachments = const [],
-    this.syncedAt,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now(); // Use provided date or default to now
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'status': status,
-      'aircraftId': aircraftId,
-      'attachments': jsonEncode(attachments),
-      'syncedAt': syncedAt?.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-
-  factory Task.fromMap(Map<String, dynamic> map) {
-    return Task(
-      id: map['id'],
-      title: map['title'],
-      description: map['description'],
-      status: map['status'],
-      aircraftId: map['aircraftId'],
-      attachments: map['attachments'] != null
-          ? List<String>.from(jsonDecode(map['attachments']))
-          : const [],
-      syncedAt: map['syncedAt'] != null ? DateTime.parse(map['syncedAt']) : null,
-      createdAt: DateTime.parse(map['createdAt']),
-    );
-  }
-}
-
-class Aircraft {
-  final int? id;
-  final String registrationNumber;
-  final String model;
-  final String manufacturer;
-  final int yearOfManufacture;
-  final String status;
-  final DateTime? syncedAt;
-  final DateTime createdAt;
-
-  Aircraft({
-    this.id,
-    required this.registrationNumber,
-    required this.model,
-    required this.manufacturer,
-    required this.yearOfManufacture,
-    this.status = 'active',
-    this.syncedAt,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now(); // Use provided date or default to now
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'registrationNumber': registrationNumber,
-      'model': model,
-      'manufacturer': manufacturer,
-      'yearOfManufacture': yearOfManufacture,
-      'status': status,
-      'syncedAt': syncedAt?.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-
-  factory Aircraft.fromMap(Map<String, dynamic> map) {
-    return Aircraft(
-      id: map['id'],
-      registrationNumber: map['registrationNumber'],
-      model: map['model'],
-      manufacturer: map['manufacturer'],
-      yearOfManufacture: map['yearOfManufacture'],
-      status: map['status'],
-      syncedAt: map['syncedAt'] != null ? DateTime.parse(map['syncedAt']) : null,
-      createdAt: DateTime.parse(map['createdAt']),
-    );
-  }
-}
-
-class AuditLog {
-  final int? id;
-  final String userName;
-  final String action;
-  final String entityType;
-  final String? entityId;
-  final String? details;
-  final DateTime createdAt;
-
-  AuditLog({
-    this.id,
-    required this.userName,
-    required this.action,
-    required this.entityType,
-    this.entityId,
-    this.details,
-    DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'userName': userName,
-      'action': action,
-      'entityType': entityType,
-      'entityId': entityId,
-      'details': details,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
-
-  factory AuditLog.fromMap(Map<String, dynamic> map) {
-    return AuditLog(
-      id: map['id'],
-      userName: map['userName'],
-      action: map['action'],
-      entityType: map['entityType'],
-      entityId: map['entityId'],
-      details: map['details'],
-      createdAt: DateTime.parse(map['createdAt']),
-    );
-  }
-}
+import 'models/task.dart';
+import 'models/aircraft.dart';
+import 'models/audit_log.dart';
 
 class DatabaseHelper {
   // Singleton pattern ensures only one database instance across the app
@@ -215,7 +75,7 @@ class DatabaseHelper {
     ''');
   }
 
-
+  // Task methods
   Future<int> insertTask(Task task) async {
     final db = await database;
     return db.insert('tasks', task.toMap());

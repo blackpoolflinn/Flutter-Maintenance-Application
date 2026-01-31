@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:maintenance_application/data/models/job.dart';
+import 'package:maintenance_application/data/models/aircraft.dart';
 
 void main() {
   group('Aircraft', () {

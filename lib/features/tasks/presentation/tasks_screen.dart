@@ -7,7 +7,7 @@ import 'package:path/path.dart' as path;
 import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/tasks_provider.dart';
 import '../../../core/providers/aircraft_provider.dart';
-import '../../../data/models/job.dart';
+import '../../../data/models/task.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});

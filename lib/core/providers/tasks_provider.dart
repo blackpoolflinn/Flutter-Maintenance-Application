@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/models/job.dart';
+import '../../data/models/task.dart';
+import '../../data/database_helper.dart';
 import '../services/audit_service.dart';
 
 class TasksProvider extends ChangeNotifier {

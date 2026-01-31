@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../data/models/job.dart';
+import '../../data/database_helper.dart';
 import '../services/audit_service.dart';
 
 class SyncProvider extends ChangeNotifier {

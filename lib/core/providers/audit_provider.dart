@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/job.dart';
+import '../../data/models/audit_log.dart';
 import '../services/audit_service.dart';
 
 class AuditProvider extends ChangeNotifier {
