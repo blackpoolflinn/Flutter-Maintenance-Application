@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dashboard_widgets.dart';
+import 'recent_activity_card.dart';
 import '../../../core/theme/app_colors.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -30,7 +31,15 @@ class DashboardScreen extends StatelessWidget {
               const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: MyTasksCard()),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        MyTasksCard(),
+                        SizedBox(height: 24),
+                        RecentActivityCard(),
+                      ],
+                    ),
+                  ),
                   SizedBox(width: 24),
                   Expanded(child: AircraftOverviewCard()),
                 ],
@@ -39,6 +48,8 @@ class DashboardScreen extends StatelessWidget {
               const Column(
                 children: [
                   MyTasksCard(),
+                  SizedBox(height: 24),
+                  RecentActivityCard(),
                   SizedBox(height: 24),
                   AircraftOverviewCard(),
                 ],

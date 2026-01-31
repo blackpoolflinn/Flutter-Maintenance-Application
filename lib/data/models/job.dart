@@ -100,6 +100,50 @@ class Aircraft {
   }
 }
 
+class AuditLog {
+  final int? id;
+  final String userName;
+  final String action;
+  final String entityType;
+  final String? entityId;
+  final String? details;
+  final DateTime createdAt;
+
+  AuditLog({
+    this.id,
+    required this.userName,
+    required this.action,
+    required this.entityType,
+    this.entityId,
+    this.details,
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'userName': userName,
+      'action': action,
+      'entityType': entityType,
+      'entityId': entityId,
+      'details': details,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory AuditLog.fromMap(Map<String, dynamic> map) {
+    return AuditLog(
+      id: map['id'],
+      userName: map['userName'],
+      action: map['action'],
+      entityType: map['entityType'],
+      entityId: map['entityId'],
+      details: map['details'],
+      createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+}
+
 class DatabaseHelper {
   // Singleton pattern ensures only one database instance across the app
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -127,7 +171,9 @@ class DatabaseHelper {
     );
   }
 
+  // Initialize database tables
   Future<void> _onCreate(Database db, int version) async {
+    // Tasks table - stores maintenance tasks
     await db.execute('''
       CREATE TABLE tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -141,6 +187,7 @@ class DatabaseHelper {
       )
     ''');
 
+    // Aircraft table - stores aircraft registry
     await db.execute('''
       CREATE TABLE aircraft (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -150,6 +197,19 @@ class DatabaseHelper {
         yearOfManufacture INTEGER NOT NULL,
         status TEXT NOT NULL DEFAULT 'active',
         syncedAt TEXT,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+
+    // Audit logs table - tracks all user activities
+    await db.execute('''
+      CREATE TABLE audit_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userName TEXT NOT NULL,
+        action TEXT NOT NULL,
+        entityType TEXT NOT NULL,
+        entityId TEXT,
+        details TEXT,
         createdAt TEXT NOT NULL
       )
     ''');
@@ -183,11 +243,13 @@ class DatabaseHelper {
     return result.map((map) => Task.fromMap(map)).toList();
   }
 
+  /// Marks multiple tasks as synced with the backend
+  /// Uses parameterized query with dynamic placeholders for safety
   Future<void> markTasksSynced(List<int> ids, DateTime syncedAt) async {
     if (ids.isEmpty) return;
     final db = await database;
     final syncedAtValue = syncedAt.toIso8601String();
-    // Create SQL placeholders (?, ?, ?) for safe parameterized query
+    // Create SQL placeholders (?, ?, ?) - one for each ID
     final placeholders = List.filled(ids.length, '?').join(',');
     await db.rawUpdate(
       'UPDATE tasks SET syncedAt = ? WHERE id IN ($placeholders)',
@@ -223,15 +285,37 @@ class DatabaseHelper {
     return result.map((map) => Aircraft.fromMap(map)).toList();
   }
 
+  /// Marks multiple aircraft as synced with the backend
+  /// Uses parameterized query with dynamic placeholders for safety
   Future<void> markAircraftSynced(List<int> ids, DateTime syncedAt) async {
     if (ids.isEmpty) return;
     final db = await database;
     final syncedAtValue = syncedAt.toIso8601String();
-    // Create SQL placeholders (?, ?, ?) for safe parameterized query
+    // Create SQL placeholders (?, ?, ?) - one for each ID
     final placeholders = List.filled(ids.length, '?').join(',');
     await db.rawUpdate(
       'UPDATE aircraft SET syncedAt = ? WHERE id IN ($placeholders)',
       [syncedAtValue, ...ids],
     );
+  }
+
+  // Audit log methods
+  Future<int> insertAuditLog(AuditLog log) async {
+    final db = await database;
+    return db.insert('audit_logs', log.toMap());
+  }
+
+  Future<List<AuditLog>> getAuditLogs({int limit = 50}) async {
+    final db = await database;
+    final result = await db.query(
+      'audit_logs',
+      orderBy: 'createdAt DESC',
+      limit: limit,
+    );
+    return result.map((map) => AuditLog.fromMap(map)).toList();
+  }
+
+  Future<List<AuditLog>> getRecentAuditLogs({int limit = 10}) async {
+    return getAuditLogs(limit: limit);
   }
 }

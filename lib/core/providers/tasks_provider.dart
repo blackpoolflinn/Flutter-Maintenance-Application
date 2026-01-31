@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../data/models/job.dart';
+import '../services/audit_service.dart';
 
 class TasksProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper();
+  final AuditService _auditService = AuditService();
   List<Task> _tasks = [];
   bool _isLoading = false;
 
@@ -37,11 +39,11 @@ class TasksProvider extends ChangeNotifier {
         attachments: const [],
         syncedAt: null,
       );
-      await _db.insertTask(task);
+      final taskId = await _db.insertTask(task);
+      await _auditService.logTaskCreated(title, taskId);
       await loadTasks();
     } catch (e) {
-      print('Error creating task: $e');
-      // Fail silently and refresh
+      // Refresh task list even on error to maintain consistency
       await loadTasks();
     }
   }
@@ -49,10 +51,11 @@ class TasksProvider extends ChangeNotifier {
   /// Delete a task
   Future<void> deleteTask(int id) async {
     try {
+      final task = _tasks.firstWhere((t) => t.id == id);
       await _db.deleteTask(id);
+      await _auditService.logTaskDeleted(task.title, id);
       await loadTasks();
     } catch (e) {
-      print('Error deleting task: $e');
       await loadTasks();
     }
   }
@@ -71,9 +74,9 @@ class TasksProvider extends ChangeNotifier {
         createdAt: task.createdAt,
       );
       await _db.updateTask(updatedTask);
+      await _auditService.logTaskUpdated(task.title, task.id, newStatus);
       await loadTasks();
     } catch (e) {
-      print('Error updating task: $e');
       await loadTasks();
     }
   }
@@ -94,7 +97,6 @@ class TasksProvider extends ChangeNotifier {
       await _db.updateTask(updatedTask);
       await loadTasks();
     } catch (e) {
-      print('Error updating task aircraft: $e');
       await loadTasks();
     }
   }
@@ -115,7 +117,6 @@ class TasksProvider extends ChangeNotifier {
       await _db.updateTask(updatedTask);
       await loadTasks();
     } catch (e) {
-      print('Error updating task attachments: $e');
       await loadTasks();
     }
   }

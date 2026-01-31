@@ -101,7 +101,6 @@ class _AircraftScreenState extends State<AircraftScreen> {
         );
       }
     } catch (e) {
-      print('Create aircraft error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error creating aircraft: $e')),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../data/models/job.dart';
+import '../services/audit_service.dart';
 
 class AircraftProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper();
+  final AuditService _auditService = AuditService();
   List<Aircraft> _aircraft = [];
   bool _isLoading = false;
 
@@ -38,10 +40,10 @@ class AircraftProvider extends ChangeNotifier {
         status: 'active',
         syncedAt: null,
       );
-      await _db.insertAircraft(aircraft);
+      final aircraftId = await _db.insertAircraft(aircraft);
+      await _auditService.logAircraftCreated(registrationNumber, aircraftId);
       await loadAircraft();
     } catch (e) {
-      print('Error creating aircraft: $e');
       await loadAircraft();
     }
   }
@@ -49,10 +51,11 @@ class AircraftProvider extends ChangeNotifier {
   /// Delete an aircraft
   Future<void> deleteAircraft(int id) async {
     try {
+      final aircraft = _aircraft.firstWhere((a) => a.id == id);
       await _db.deleteAircraft(id);
+      await _auditService.logAircraftDeleted(aircraft.registrationNumber, id);
       await loadAircraft();
     } catch (e) {
-      print('Error deleting aircraft: $e');
       await loadAircraft();
     }
   }
@@ -71,9 +74,9 @@ class AircraftProvider extends ChangeNotifier {
         createdAt: aircraft.createdAt,
       );
       await _db.updateAircraft(updatedAircraft);
+      await _auditService.logAircraftUpdated(aircraft.registrationNumber, aircraft.id, newStatus);
       await loadAircraft();
     } catch (e) {
-      print('Error updating aircraft: $e');
       await loadAircraft();
     }
   }
