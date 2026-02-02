@@ -6,7 +6,7 @@ class AuthService {
   Future<bool> login(String email, String password) async {
     try {
       // Simple local auth - no backend call needed
-      if (email == 'rampcheck' && password == 'password123') {
+      if (email == 'flinn' && password == 'password123') {
         await _storage.write(key: 'auth_token', value: 'local_auth_token');
         return true;
       }
