@@ -44,8 +44,11 @@ class TasksProvider extends ChangeNotifier {
       await _auditService.logTaskCreated(title, taskId);
       await loadTasks();
     } catch (e) {
+      // Log error for debugging
+      print('Error creating task: $e');
       // Refresh task list even on error to maintain consistency
       await loadTasks();
+      rethrow; // Re-throw to allow UI to handle the error
     }
   }
 

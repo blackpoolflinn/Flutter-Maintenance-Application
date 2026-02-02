@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
+from contextlib import contextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,15 +23,26 @@ app.add_middleware(
 DB_PATH = Path(__file__).parent / "sync.db"
 
 
-def _get_connection() -> sqlite3.Connection:
-    con = sqlite3.connect(DB_PATH, check_same_thread=False)
+@contextmanager
+def _get_connection():
+    """Context manager for database connections with proper timeout and WAL mode"""
+    con = sqlite3.connect(
+        DB_PATH,
+        timeout=10.0,  # Wait up to 10 seconds for lock
+        isolation_level=None,  # Autocommit mode
+    )
     con.row_factory = sqlite3.Row
-    return con
+    # Enable WAL mode for better concurrent access
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA busy_timeout=10000")  # 10 second busy timeout
+    try:
+        yield con
+    finally:
+        con.close()
 
 
 def _init_db() -> None:
-    con = _get_connection()
-    try:
+    with _get_connection() as con:
         con.execute(
             """
             CREATE TABLE IF NOT EXISTS tasks (
@@ -58,9 +70,6 @@ def _init_db() -> None:
             )
             """
         )
-        con.commit()
-    finally:
-        con.close()
 
 
 class TaskPayload(BaseModel):
@@ -95,13 +104,12 @@ def health_check() -> dict:
 @app.post("/sync")
 def sync(payload: SyncRequest) -> dict:
     _init_db()
-    con = _get_connection()
     synced_at = datetime.utcnow().isoformat()
 
     task_ids: list[int] = []
     aircraft_ids: list[int] = []
 
-    try:
+    with _get_connection() as con:
         for task in payload.tasks:
             if task.id is None:
                 continue
@@ -159,10 +167,6 @@ def sync(payload: SyncRequest) -> dict:
                 ),
             )
             aircraft_ids.append(aircraft.id)
-
-        con.commit()
-    finally:
-        con.close()
 
     return {
         "taskIds": task_ids,

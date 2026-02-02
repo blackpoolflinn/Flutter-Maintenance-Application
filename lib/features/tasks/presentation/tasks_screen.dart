@@ -121,11 +121,21 @@ class _TasksScreenState extends State<TasksScreen> {
             title: _titleController.text,
             description: _descriptionController.text,
             aircraftId: _selectedAircraftId!,
-          );
-      _titleController.clear();
-      _descriptionController.clear();
-      setState(() {
-        _selectedAircraftId = null;
+          ).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create task: $error'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }).then((_) {
+        // Only clear on success
+        _titleController.clear();
+        _descriptionController.clear();
+        setState(() {
+          _selectedAircraftId = null;
+        });
       });
     }
   }
